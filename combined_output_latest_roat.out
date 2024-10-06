@@ -1,0 +1,567 @@
+--- Contents of slurm-184175.out ---
+Running page_rank_pull_parallel with 1 Threads: Iteration 1
+Using DOUBLE
+Number of Threads : 1
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 2.883734
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 2.884288
+
+
+--- Contents of slurm-184176.out ---
+Running page_rank_push_parallel with 1 Threads: Iteration 1
+Using DOUBLE
+Number of Threads : 1
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.959515
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.976101
+
+
+--- Contents of slurm-184177.out ---
+Running page_rank_push_parallel_atomic with 1 Threads: Iteration 1
+Using DOUBLE
+Number of Threads : 1
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 5.525800
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 5.526305
+
+
+--- Contents of slurm-184178.out ---
+Running page_rank_pull_parallel with 1 Threads: Iteration 2
+Using DOUBLE
+Number of Threads : 1
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 2.880947
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 2.881494
+
+
+--- Contents of slurm-184181.out ---
+Running page_rank_push_parallel with 1 Threads: Iteration 2
+Using DOUBLE
+Number of Threads : 1
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 2.039338
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 2.056057
+
+
+--- Contents of slurm-184182.out ---
+Running page_rank_push_parallel_atomic with 1 Threads: Iteration 2
+Using DOUBLE
+Number of Threads : 1
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 5.560801
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 5.561309
+
+
+--- Contents of slurm-184183.out ---
+Running page_rank_pull_parallel with 1 Threads: Iteration 3
+Using DOUBLE
+Number of Threads : 1
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 2.930266
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 2.930733
+
+
+--- Contents of slurm-184184.out ---
+Running page_rank_push_parallel with 1 Threads: Iteration 3
+Using DOUBLE
+Number of Threads : 1
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 2.044832
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 2.059636
+
+
+--- Contents of slurm-184186.out ---
+Running page_rank_push_parallel_atomic with 1 Threads: Iteration 3
+Using DOUBLE
+Number of Threads : 1
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 5.524443
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 5.524955
+
+
+--- Contents of slurm-184187.out ---
+Running page_rank_pull_parallel with 2 Threads: Iteration 1
+Using DOUBLE
+Number of Threads : 2
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.631991
+1, 1.616116
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.632598
+
+
+--- Contents of slurm-184188.out ---
+Running page_rank_push_parallel with 2 Threads: Iteration 1
+Using DOUBLE
+Number of Threads : 2
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.435842
+1, 1.420740
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.451201
+
+
+--- Contents of slurm-184189.out ---
+Running page_rank_push_parallel_atomic with 2 Threads: Iteration 1
+Using DOUBLE
+Number of Threads : 2
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 2.438008
+1, 2.437983
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 2.438569
+
+
+--- Contents of slurm-184194.out ---
+Running page_rank_pull_parallel with 2 Threads: Iteration 2
+Using DOUBLE
+Number of Threads : 2
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.457469
+1, 1.443158
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.457848
+
+
+--- Contents of slurm-184195.out ---
+Running page_rank_push_parallel with 2 Threads: Iteration 2
+Using DOUBLE
+Number of Threads : 2
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.259135
+1, 1.246462
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.271957
+
+
+--- Contents of slurm-184196.out ---
+Running page_rank_push_parallel_atomic with 2 Threads: Iteration 2
+Using DOUBLE
+Number of Threads : 2
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 2.659923
+1, 2.659890
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 2.660326
+
+
+--- Contents of slurm-184197.out ---
+Running page_rank_pull_parallel with 2 Threads: Iteration 3
+Using DOUBLE
+Number of Threads : 2
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.219475
+1, 1.219445
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.219966
+
+
+--- Contents of slurm-184200.out ---
+Running page_rank_push_parallel with 2 Threads: Iteration 3
+Using DOUBLE
+Number of Threads : 2
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.140242
+1, 1.128425
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.151784
+
+
+--- Contents of slurm-184201.out ---
+Running page_rank_push_parallel_atomic with 2 Threads: Iteration 3
+Using DOUBLE
+Number of Threads : 2
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 2.628601
+1, 2.613806
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 2.628993
+
+
+--- Contents of slurm-184202.out ---
+Running page_rank_pull_parallel with 4 Threads: Iteration 1
+Using DOUBLE
+Number of Threads : 4
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 0.685626
+1, 0.685603
+2, 0.685580
+3, 0.672203
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 0.686303
+
+
+--- Contents of slurm-184204.out ---
+Running page_rank_push_parallel with 4 Threads: Iteration 1
+Using DOUBLE
+Number of Threads : 4
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.244804
+1, 1.231025
+2, 1.215467
+3, 1.199945
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.258805
+
+
+--- Contents of slurm-184205.out ---
+Running page_rank_push_parallel_atomic with 4 Threads: Iteration 1
+Using DOUBLE
+Number of Threads : 4
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 2.669127
+1, 2.685143
+2, 2.693134
+3, 2.699818
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 2.700720
+
+
+--- Contents of slurm-184207.out ---
+Running page_rank_pull_parallel with 4 Threads: Iteration 2
+Using DOUBLE
+Number of Threads : 4
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 0.674056
+1, 0.674007
+2, 0.673987
+3, 0.673958
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 0.674815
+
+
+--- Contents of slurm-184208.out ---
+Running page_rank_push_parallel with 4 Threads: Iteration 2
+Using DOUBLE
+Number of Threads : 4
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.081050
+1, 1.068646
+2, 1.055812
+3, 1.041399
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.093702
+
+
+--- Contents of slurm-184212.out ---
+Running page_rank_push_parallel_atomic with 4 Threads: Iteration 2
+Using DOUBLE
+Number of Threads : 4
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.329409
+1, 1.329340
+2, 1.329307
+3, 1.313352
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.330279
+
+
+--- Contents of slurm-184213.out ---
+Running page_rank_pull_parallel with 4 Threads: Iteration 3
+Using DOUBLE
+Number of Threads : 4
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 0.721333
+1, 0.721287
+2, 0.720660
+3, 0.706968
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 0.722161
+
+
+--- Contents of slurm-184216.out ---
+Running page_rank_push_parallel with 4 Threads: Iteration 3
+Using DOUBLE
+Number of Threads : 4
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.100329
+1, 1.087551
+2, 1.073344
+3, 1.059106
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.112664
+
+
+--- Contents of slurm-184217.out ---
+Running page_rank_push_parallel_atomic with 4 Threads: Iteration 3
+Using DOUBLE
+Number of Threads : 4
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.331289
+1, 1.331261
+2, 1.331233
+3, 1.315634
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.332140
+
+
+--- Contents of slurm-184220.out ---
+Running page_rank_pull_parallel with 8 Threads: Iteration 1
+Using DOUBLE
+Number of Threads : 8
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 0.483481
+1, 0.483443
+2, 0.483401
+3, 0.469098
+4, 0.483337
+5, 0.468832
+6, 0.465627
+7, 0.469087
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 0.484261
+
+
+--- Contents of slurm-184222.out ---
+Running page_rank_push_parallel with 8 Threads: Iteration 1
+Using DOUBLE
+Number of Threads : 8
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.883520
+1, 1.854999
+2, 1.860814
+3, 1.835241
+4, 1.818506
+5, 1.798994
+6, 1.801332
+7, 1.781901
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.894571
+
+
+--- Contents of slurm-184226.out ---
+Running page_rank_push_parallel_atomic with 8 Threads: Iteration 1
+Using DOUBLE
+Number of Threads : 8
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 0.875403
+1, 0.875387
+2, 0.875367
+3, 0.874403
+4, 0.875298
+5, 0.862449
+6, 0.875215
+7, 0.862679
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 0.876223
+
+
+--- Contents of slurm-184227.out ---
+Running page_rank_pull_parallel with 8 Threads: Iteration 2
+Using DOUBLE
+Number of Threads : 8
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 0.492756
+1, 0.492721
+2, 0.492677
+3, 0.492635
+4, 0.477868
+5, 0.489936
+6, 0.477740
+7, 0.492512
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 0.493599
+
+
+--- Contents of slurm-184228.out ---
+Running page_rank_push_parallel with 8 Threads: Iteration 2
+Using DOUBLE
+Number of Threads : 8
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 2.043097
+1, 2.028710
+2, 2.012745
+3, 1.997366
+4, 1.981109
+5, 1.966096
+6, 1.949812
+7, 1.934824
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 2.056727
+
+
+--- Contents of slurm-184233.out ---
+Running page_rank_push_parallel_atomic with 8 Threads: Iteration 2
+Using DOUBLE
+Number of Threads : 8
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 1.214844
+1, 1.214773
+2, 1.214772
+3, 1.198830
+4, 1.214681
+5, 1.195278
+6, 1.195158
+7, 1.214609
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 1.216176
+
+
+--- Contents of slurm-184236.out ---
+Running page_rank_pull_parallel with 8 Threads: Iteration 3
+Using DOUBLE
+Number of Threads : 8
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 0.612972
+1, 0.612995
+2, 0.612941
+3, 0.612903
+4, 0.610698
+5, 0.598911
+6, 0.612778
+7, 0.594447
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 0.613746
+
+
+--- Contents of slurm-184237.out ---
+Running page_rank_push_parallel with 8 Threads: Iteration 3
+Using DOUBLE
+Number of Threads : 8
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 2.488251
+1, 2.475153
+2, 2.459736
+3, 2.444731
+4, 2.429579
+5, 2.414456
+6, 2.399404
+7, 2.384450
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 2.502452
+
+
+--- Contents of slurm-184242.out ---
+Running page_rank_push_parallel_atomic with 8 Threads: Iteration 3
+Using DOUBLE
+Number of Threads : 8
+Number of Iterations: 20
+Reading graph
+Created graph
+thread_id, time_taken
+0, 0.891999
+1, 0.891949
+2, 0.891880
+3, 0.891828
+4, 0.891680
+5, 0.878944
+6, 0.891686
+7, 0.878950
+Sum of page ranks : 1966117.250000
+Time taken (in seconds) : 0.893233
+
+
