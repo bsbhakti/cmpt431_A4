@@ -24,6 +24,10 @@ typedef double PageRankType;
 #endif
 
 CustomBarrier *barrier = nullptr;
+uintV nextProcessedVertex = 0;
+uint strategy = 1;
+std::mutex nextVertex;
+
 
 struct thread_args {
     Graph *g;
@@ -33,48 +37,113 @@ struct thread_args {
     PageRankType* pr_curr;
     PageRankType *pr_next;
     double time_taken;
+    uint thread_id;
 };
 
+uintV getNextProcessedVertex(){
+  return nextProcessedVertex;
+}
+void incrementNextProcessedVertex(uintV n){
+  if(nextProcessedVertex == n ){
+    std::cout<<nextProcessedVertex<<std::endl;
+    nextProcessedVertex = -1;
+  }
+  else {
+    nextProcessedVertex++;
+  }
+}
+uintV decrementNextProcessedVertex(){
+  return nextProcessedVertex--;
+}
+
+void processVertex(Graph *g, uintV startIndexCopy, PageRankType *pr_curr, PageRankType *pr_next){
+  uintE in_degree = g->vertices_[startIndexCopy].getInDegree();
+          // std::cout<<"Number of in degree"<< in_degree<<std::endl;
+
+        for (uintE i = 0; i < in_degree; i++) {
+          uintV u = g->vertices_[startIndexCopy].getInNeighbor(i);
+          uintE u_out_degree = g->vertices_[u].getOutDegree();
+          if (u_out_degree > 0)
+              pr_next[startIndexCopy] += (pr_curr[u] / (PageRankType) u_out_degree);
+        }
+}
+
+void computePageRank(uintV v, PageRankType *pr_next, PageRankType*pr_curr){
+    pr_next[v] = PAGE_RANK(pr_next[v]);
+    // reset pr_curr for the next iteration
+    pr_curr[v] = pr_next[v];
+    pr_next[v] = 0.0;
+}
 
 void pageRankThread(thread_args *thread_args){
     // std::cout<<"Inside thread method"<<std::endl;
     timer local;
     local.start();
     Graph *g = thread_args->g; 
+    uintV n = g->n_; 
     int max_iter = thread_args->max_iter; 
     uintV startIndex  = thread_args->startIndex; 
     uintV endIndex  = thread_args->endIndex; 
     PageRankType* pr_curr  = thread_args->pr_curr; 
-    PageRankType *pr_next  = thread_args->pr_next; 
+    PageRankType *pr_next  = thread_args->pr_next;
+    uint thread_id  = thread_args->thread_id;
+
+
   for (int iter = 0; iter < max_iter; iter++) {
     // for each vertex 'v' in this subset of vertices, process all its inNeighbors 'u'
-    for (uintV startIndexCopy = startIndex; startIndexCopy < endIndex; startIndexCopy++){
-        uintE in_degree = g->vertices_[startIndexCopy].getInDegree();
-        // std::cout<<"Number of in degree"<< in_degree<<std::endl;
-
-      for (uintE i = 0; i < in_degree; i++) {
-        uintV u = g->vertices_[startIndexCopy].getInNeighbor(i);
-        uintE u_out_degree = g->vertices_[u].getOutDegree();
-        if (u_out_degree > 0)
-            pr_next[startIndexCopy] += (pr_curr[u] / (PageRankType) u_out_degree);
+    if(strategy == 3 ){
+      while(true){
+        nextVertex.lock();
+        uintV u  = getNextProcessedVertex();
+        if(u == -1){
+          nextVertex.unlock();
+          break;
+        }
+        incrementNextProcessedVertex(n);
+        nextVertex.unlock();
+        // std::cout<<u<<std::endl;
+        processVertex(g,u,pr_curr,pr_next);
+      }
+    }
+    else {
+      for (uintV startIndexCopy = startIndex; startIndexCopy < endIndex; startIndexCopy++){
+        processVertex(g,startIndexCopy,pr_curr,pr_next);
       }
     }
     // std::cout<<"Waiting at the barrier"<<std::endl;
-
     // barrier wait here because we are about the switch curr and next
     barrier->wait();
     // std::cout<<"Done Waiting at the barrier"<<std::endl;
-
-    
-
-    for (uintV v = startIndex; v < endIndex; v++) {
-      pr_next[v] = PAGE_RANK(pr_next[v]);
-
-      // reset pr_curr for the next iteration
-      pr_curr[v] = pr_next[v];
-      pr_next[v] = 0.0;
+    if(strategy == 3){
+      if(thread_id == 0){
+        nextProcessedVertex = 0;
+      }
+      barrier->wait();
+      while(true){
+        nextVertex.lock();
+        uintV v = getNextProcessedVertex();
+        if( v == -1){
+          nextVertex.unlock();
+          break;
+        }
+        decrementNextProcessedVertex();
+        nextVertex.unlock();
+        //vertices_processed += 1 // used in output validation
+        computePageRank(v,pr_next, pr_curr);
+      }
+    }
+    else {
+      for (uintV v = startIndex; v < endIndex; v++) {
+        computePageRank(v,pr_next, pr_curr);
+        }
     }
     barrier->wait();
+    if(strategy == 3){
+      if(thread_id == 0){
+        nextProcessedVertex = 0;
+      }
+        barrier->wait();
+      }
 
   }
   thread_args->time_taken = local.stop();
@@ -107,29 +176,47 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
   uint startIndex = 0;
   uint endIndex = 0;
   t1.start();
+  std::cout<<"Total vertices:"<<n<<std::endl;
+
   // Create threads and distribute the work across T threads
   // -------------------------------------------------------------------
   for (uint i =0 ; i < nThreads; i++){
     startIndex = endIndex;
     if(strategy == 1){
+      //default
       endIndex = startIndex + numOfVerPerThread;
       if( i == 0){
           endIndex += remainder;
       }
     }
     else if(strategy == 2){
+      // edge assignment
       while(totalAssignedEdges < ((i +1) *numOfEdgesPerThread)){
         totalAssignedEdges += g.vertices_[endIndex].in_degree_;
         endIndex ++;
       }
+      if(i == nThreads -1){
+        if(m - totalAssignedEdges){
+          endIndex = n;
+          // totalAssignedEdges +=1 
+        }
+      }
+    }
+    else if(strategy == 3){
+      //dynamic mapping vertex based
+      startIndex = nextProcessedVertex;
+      endIndex = nextProcessedVertex +1;
+      nextProcessedVertex++;
     }
     // std::cout<<"StartInd: "<< startIndex<<"EndInd: "<<endIndex<< "Thread: "<<i<<std::endl;
+
     all_arguments[i].g = &g;
     all_arguments[i].max_iter = max_iters;
     all_arguments[i].startIndex = startIndex;
     all_arguments[i].endIndex = endIndex;
     all_arguments[i].pr_curr = pr_curr;
     all_arguments[i].pr_next = pr_next;
+    all_arguments[i].thread_id = i;
 
     std::thread new_thread(pageRankThread,&all_arguments[i]);
     all_threads.push_back(std::move(new_thread));
@@ -188,7 +275,7 @@ int main(int argc, char *argv[]) {
   uint n_threads = cl_options["nThreads"].as<uint>();
   uint max_iterations = cl_options["nIterations"].as<uint>();
   std::string input_file_path = cl_options["inputFile"].as<std::string>();
-  uint strategy = cl_options["strategy"].as<uint>();
+  strategy = cl_options["strategy"].as<uint>();
 
 
 #ifdef USE_INT

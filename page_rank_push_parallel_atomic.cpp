@@ -105,7 +105,8 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
   // Push based pagerank
   timer t1;
   double time_taken = 0.0;
-//   std::cout<<"Total num vertices "<<g.n_<<std::endl;
+  std::cout<<"Total num vertices "<<n<<std::endl;
+  std::cout<<"Total num edges "<<m<<std::endl;
   uint numOfVerPerThread = g.n_/nThreads;
   uint remainder = g.n_% nThreads;
   uint numOfEdgesPerThread = m/nThreads;
@@ -129,6 +130,14 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
         totalAssignedEdges += g.vertices_[endIndex].in_degree_;
         endIndex ++;
       }
+      if(i == nThreads -1){
+        if(m - totalAssignedEdges){
+          endIndex = n;
+          // totalAssignedEdges +=1 
+        }
+
+      }
+    // std::cout<<"StartInd: "<< startIndex<<"EndInd: "<<endIndex<< "Thread: "<<" edges assigned:"<<totalAssignedEdges<<i<<std::endl;
     }
     // std::cout<<"StartInd: "<< startIndex<<"EndInd: "<<endIndex<< "Thread: "<<i<<std::endl;
     all_arguments[i].g = &g;
