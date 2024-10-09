@@ -42,6 +42,11 @@ struct thread_args {
     PageRankType *pr_next;
     double time_taken;
     uint thread_id;
+    long processedVertices;
+    long processedEdges;
+    double barrier1_time;
+    double barrier2_time;
+    double getNextVertex_time;
 };
 
 uintV getNextProcessedVertex(uintV n){
@@ -74,6 +79,10 @@ void computePageRank(uintV v, PageRankType *pr_next, PageRankType*pr_curr){
 void pageRankThread(thread_args *thread_args){
     // std::cout<<"Inside thread method"<<std::endl;
     timer local;
+    timer localBarrier1;
+    timer localBarrier2;
+    timer localVertex;
+
     local.start();
     Graph *g = thread_args->g; 
     uintV n = g->n_; 
@@ -84,13 +93,17 @@ void pageRankThread(thread_args *thread_args){
     PageRankType *pr_next  = thread_args->pr_next;
     uint thread_id  = thread_args->thread_id;
     uint processedVertex = 0;
+    uint processedEdges = 0;
+
 
 
   for (int iter = 0; iter < max_iter; iter++) {
     // for each vertex 'v' in this subset of vertices, process all its inNeighbors 'u'
     if(strategy == 3 or strategy == 4){
       while(true){
+        localVertex.start();
         uintV u  = getNextProcessedVertex(n);
+        thread_args->getNextVertex_time +=  localVertex.stop();
         // break;
 
         if(u == -1){
@@ -98,8 +111,8 @@ void pageRankThread(thread_args *thread_args){
         }
         for (uintV j = 0; j < k; j++) {
             // std::cout<<u<<std::endl;
+          processedEdges += g->vertices_[u].getInDegree();
           processVertex(g,u,pr_curr,pr_next);
-          processedVertex ++;
           u++;
           if(u >= n) break;
         }
@@ -111,7 +124,9 @@ void pageRankThread(thread_args *thread_args){
       }
     }
     // barrier wait here because we are about the switch curr and next
+    localBarrier1.start();
     barrier->wait();
+    thread_args->barrier1_time +=  localBarrier1.stop();
     // std::cout<<"Done Waiting at the barrier"<<std::endl;
     if(strategy == 3 or strategy == 4){
       if(thread_id == 0){
@@ -119,7 +134,9 @@ void pageRankThread(thread_args *thread_args){
       }
       barrier->wait();
       while(true){
-        uintV v = getNextProcessedVertex(n);
+        localVertex.start();
+        uintV v  = getNextProcessedVertex(n);
+        thread_args->getNextVertex_time +=  localVertex.stop();
         // break;
         if( v == -1){
           break;
@@ -127,6 +144,7 @@ void pageRankThread(thread_args *thread_args){
         for (uintV j = 0; j < k; j++) {
             // std::cout<<u<<std::endl;
           computePageRank(v,pr_next, pr_curr);
+          processedVertex ++;
           //vertices_processed += 1 // used in output validation
           v++;
           if(v >= n) break;
@@ -137,9 +155,11 @@ void pageRankThread(thread_args *thread_args){
     else {
       for (uintV v = startIndex; v < endIndex; v++) {
         computePageRank(v,pr_next, pr_curr);
-        }
+      }
     }
+    localBarrier2.start();
     barrier->wait();
+    thread_args->barrier2_time +=  localBarrier2.stop();
     if(strategy == 3 or strategy == 4){
       if(thread_id == 0){
         nextProcessedVertex = 0;
@@ -149,6 +169,9 @@ void pageRankThread(thread_args *thread_args){
   }
   // std::cout <<"this is total processed"<<processedVertex<<std::endl;
   thread_args->time_taken = local.stop();
+  thread_args->processedVertices = processedVertex;
+  thread_args->processedEdges = processedEdges;
+
 
 }
 
@@ -213,7 +236,11 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
     all_arguments[i].pr_curr = pr_curr;
     all_arguments[i].pr_next = pr_next;
     all_arguments[i].thread_id = i;
-
+    all_arguments[i].processedVertices = 0;
+    all_arguments[i].processedEdges = 0;
+    all_arguments[i].getNextVertex_time = 0.0;
+    all_arguments[i].barrier1_time = 0.0;
+    all_arguments[i].barrier2_time = 0.0;
     std::thread new_thread(pageRankThread,&all_arguments[i]);
     all_threads.push_back(std::move(new_thread));
   }
@@ -226,9 +253,9 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
 
 
   // -------------------------------------------------------------------
-  std::cout << "thread_id, time_taken" << std::endl;
+  std::cout << "thread_id, num_vertices, num_edges, barrier1_time, barrier2_time, getNextVertex_time, total_time" << std::endl;
   for (int i = 0 ; i<nThreads; i++){
-    std::cout << i<<", " << all_arguments[i].time_taken << std::endl;
+    std::cout << i<<", " << all_arguments[i].processedVertices<<", " << all_arguments[i].processedEdges<<", " << all_arguments[i].barrier1_time<<", " << all_arguments[i].barrier2_time<<", " << all_arguments[i].getNextVertex_time<<", " << all_arguments[i].time_taken << std::endl;
   }
   // Print the above statistics for each thread
   // Example output for 2 threads:
@@ -283,7 +310,9 @@ int main(int argc, char *argv[]) {
 #endif
   std::cout << std::fixed;
   std::cout << "Number of Threads : " << n_threads << std::endl;
-  std::cout << "Number of Iterations: " << max_iterations << std::endl;
+  std::cout << "Strategy : " << strategy << std::endl;
+  std::cout << "Granularity : " << k << std::endl;
+  std::cout << "Iterations: " << max_iterations << std::endl;
 
   Graph g;
   std::cout << "Reading graph\n";
