@@ -23,10 +23,14 @@ typedef int64_t PageRankType;
 typedef double PageRankType;
 #endif
 
+// create several shared count variables (each should have a portion of the total vertices). each thread has one of the count variables this way there is less contention and some dynamic mapping?
+
 CustomBarrier *barrier = nullptr;
 std::atomic<uintV> nextProcessedVertex(0);
 uint strategy = 1;
-std::mutex nextVertex;
+uint k = 1;
+std::mutex vertexLock;
+uint endIndex = 0;
 
 
 struct thread_args {
@@ -41,10 +45,10 @@ struct thread_args {
 };
 
 uintV getNextProcessedVertex(uintV n){
-  uintV curr = nextProcessedVertex.fetch_add(1);
+  uintV curr = nextProcessedVertex.fetch_add(k);
 
   if(curr >=n){
-    return -1;
+      return -1;
   }
   return curr;
 }
@@ -84,7 +88,7 @@ void pageRankThread(thread_args *thread_args){
 
   for (int iter = 0; iter < max_iter; iter++) {
     // for each vertex 'v' in this subset of vertices, process all its inNeighbors 'u'
-    if(strategy == 3 ){
+    if(strategy == 3 or strategy == 4){
       while(true){
         uintV u  = getNextProcessedVertex(n);
         // break;
@@ -92,9 +96,13 @@ void pageRankThread(thread_args *thread_args){
         if(u == -1){
           break;
         }
-        // std::cout<<u<<std::endl;
-        processVertex(g,u,pr_curr,pr_next);
-        processedVertex ++;
+        for (uintV j = 0; j < k; j++) {
+            // std::cout<<u<<std::endl;
+          processVertex(g,u,pr_curr,pr_next);
+          processedVertex ++;
+          u++;
+          if(u >= n) break;
+        }
       }
     }
     else {
@@ -102,13 +110,12 @@ void pageRankThread(thread_args *thread_args){
         processVertex(g,startIndexCopy,pr_curr,pr_next);
       }
     }
-    // std::cout<<"Waiting at the barrier"<<std::endl;
     // barrier wait here because we are about the switch curr and next
     barrier->wait();
     // std::cout<<"Done Waiting at the barrier"<<std::endl;
-    if(strategy == 3){
+    if(strategy == 3 or strategy == 4){
       if(thread_id == 0){
-        nextProcessedVertex = 0; //make it equal to the number of processed vertices
+        nextProcessedVertex = 0; //make it equal to the number of processed vertices??
       }
       barrier->wait();
       while(true){
@@ -117,9 +124,13 @@ void pageRankThread(thread_args *thread_args){
         if( v == -1){
           break;
         }
-  
-        //vertices_processed += 1 // used in output validation
-        computePageRank(v,pr_next, pr_curr);
+        for (uintV j = 0; j < k; j++) {
+            // std::cout<<u<<std::endl;
+          computePageRank(v,pr_next, pr_curr);
+          //vertices_processed += 1 // used in output validation
+          v++;
+          if(v >= n) break;
+        }
       }
 
     }
@@ -129,7 +140,7 @@ void pageRankThread(thread_args *thread_args){
         }
     }
     barrier->wait();
-    if(strategy == 3){
+    if(strategy == 3 or strategy == 4){
       if(thread_id == 0){
         nextProcessedVertex = 0;
       }
@@ -166,7 +177,7 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
   uint startIndex = 0;
   uint endIndex = 0;
   t1.start();
-  std::cout<<"Total vertices:"<<n<<std::endl;
+  // std::cout<<"Total vertices:"<<n<<std::endl;
 
   // Create threads and distribute the work across T threads
   // -------------------------------------------------------------------
@@ -254,6 +265,8 @@ int main(int argc, char *argv[]) {
                "/scratch/input_graphs/roadNet-CA")},
           {"strategy", "what algo",
            cxxopts::value<uint>()->default_value(DEFAULT_STRATEGY)},
+           {"granularity", "k value",
+           cxxopts::value<uint>()->default_value(DEFAULT_STRATEGY)},
       });
 
   auto cl_options = options.parse(argc, argv);
@@ -261,7 +274,7 @@ int main(int argc, char *argv[]) {
   uint max_iterations = cl_options["nIterations"].as<uint>();
   std::string input_file_path = cl_options["inputFile"].as<std::string>();
   strategy = cl_options["strategy"].as<uint>();
-
+  k = cl_options["granularity"].as<uint>();
 
 #ifdef USE_INT
   std::cout << "Using INT\n";
