@@ -69,7 +69,7 @@ void processVertex(uintV out_degree, uintV * outNeighbors,uintV startIndexCopy, 
                 PageRankType newVal = previous + (vRank / out_degree_page_rank);
                 
                 while(!all_atomic[v].compare_exchange_weak(previous, newVal)){
-                    previous = all_atomic[v].load();
+                    // previous = all_atomic[v].load();
                     newVal = previous + (vRank / out_degree_page_rank);
                 }
             }
