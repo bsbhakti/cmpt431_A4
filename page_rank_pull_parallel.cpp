@@ -52,15 +52,11 @@ struct thread_args {
     double getNextVertex_time;
 };
 
-uintV getNextProcessedVertex(uintV n){
+uintV getNextProcessedVertex(uintV n){ //rewrite it to use compare and exchange
   uintV curr = nextProcessedVertex.fetch_add(k);
 
   if(curr >=n){
     // std::cout<<"nThreads:"<<nThreads<<std::endl;
-    if( done.load() == (nThreads-1)){
-      std::cout<<"this is reset"<<nThreads<<"dome "<<done.load()<<std::endl;
-      nextProcessedVertex.store(0, std::memory_order_relaxed);
-    }
       return -1;
   }
   return curr;
@@ -132,18 +128,15 @@ void pageRankThread(thread_args *thread_args){
       }
     }
     // barrier wait here because we are about the switch curr and next
-    done.fetch_add(1);
     localBarrier1.start();
     barrier->wait();
     thread_args->barrier1_time +=  localBarrier1.stop();
-    done.fetch_sub(1);
-    std::cout<<"vertex done waiting "<<nextProcessedVertex<<" "<<done<<std::endl;
     // std::cout<<"Done Waiting at the barrier"<<std::endl;
     if(strategy == 3 or strategy == 4){
-      // if(thread_id == 0){
-      //   nextProcessedVertex = 0; //make it equal to the number of processed vertices??
-      // }
-      // barrier->wait();
+      if(thread_id == 0){ //make atomic
+        nextProcessedVertex = 0; //make it equal to the number of processed vertices??
+      }
+      barrier->wait();
       while(true){
         localVertex.start();
         uintV v  = getNextProcessedVertex(n);
@@ -174,8 +167,7 @@ void pageRankThread(thread_args *thread_args){
     if(strategy == 3 or strategy == 4){
       if(thread_id == 0){
         nextProcessedVertex.store(0,std::memory_order_relaxed);
-         std::cout<<"making it 0 "<<nextProcessedVertex<<" "<<done<<std::endl;
-
+        //  std::cout<<"making it 0 "<<nextProcessedVertex<<" "<<done<<std::endl;
       }
       barrier->wait();
     }
