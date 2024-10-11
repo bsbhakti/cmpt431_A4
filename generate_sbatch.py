@@ -9,14 +9,14 @@ subprocess.run(["make"], check=True)
 output_dir = "sbatch_files"
 os.makedirs(output_dir, exist_ok=True)
 
-STUDENT_ID = ""
+STUDENT_ID = "bsb10"
 ASSIGNMENT_FOLDER = ""
 
-assert STUDENT_ID and ASSIGNMENT_FOLDER, "Please fill in the STUDENT_ID and ASSIGNMENT_FOLDER variables."
+# assert STUDENT_ID and ASSIGNMENT_FOLDER, "Please fill in the STUDENT_ID and ASSIGNMENT_FOLDER variables."
 
 commands = [
-    f"/home/{STUDENT_ID}/{ASSIGNMENT_FOLDER}/page_rank_pull_parallel",
-    f"/home/{STUDENT_ID}/{ASSIGNMENT_FOLDER}/page_rank_push_parallel_atomic"
+    f"/home/{STUDENT_ID}/page_rank_pull_parallel",
+    f"/home/{STUDENT_ID}/page_rank_push_parallel_atomic"
 ]
 
 granularities = [10, 100, 1000, 2000]
