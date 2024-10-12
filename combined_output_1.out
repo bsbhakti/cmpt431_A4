@@ -248,7 +248,7 @@ Strategy : 4
 Granularity : 100
 Iterations: 20
 Reading graph
-Created graph
+Created graph 47.166712
 thread_id, num_vertices, num_edges, barrier1_time, barrier2_time, getNextVertex_time, total_time
 0, 63166196, 125167738, 0.001549, 0.001864, 0.227511, 31.976860
 1, 63088498, 124961323, 0.001499, 0.001896, 0.226743, 31.976815
@@ -388,7 +388,7 @@ thread_id, num_vertices, num_edges, barrier1_time, barrier2_time, getNextVertex_
 3, 63125578, 126138716, 0.002324, 0.001879, 2.507261, 44.191657
 4, 57196696, 120622395, 0.002483, 0.002077, 2.714456, 44.191454
 5, 62043917, 126801525, 0.002442, 0.002057, 2.669380, 44.191446
-6, 61207787, 119582602, 0.002300, 0.001785, 2.566108, 44.191347
+6, 61207787, 119582602, 0.002300, 0.06.10463701785, 2.566108, 44.191347
 7, 63675909, 124374019, 0.002217, 0.001890, 2.501501, 44.191088
 Sum of page ranks : 13887925.279471
 Time taken (in seconds) : 44.193140
@@ -396,7 +396,7 @@ Time taken (in seconds) : 44.193140
 
 --- Contents of slurm-190234.out ---
 Running page_rank_pull_parallel with 8 Threads: Iteration 3
-Using DOUBLE
+Using DOUBLE6.104637
 Number of Threads : 8
 Strategy : 4
 Granularity : 100
@@ -443,7 +443,7 @@ Running page_rank_pull_parallel with 8 Threads: Iteration 3
 Using DOUBLE
 Number of Threads : 8
 Strategy : 4
-Granularity : 1000
+Granularity : 10006.104637
 Iterations: 20
 Reading graph
 Created graph

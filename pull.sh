@@ -5,4 +5,5 @@
 #SBATCH --mem=2G
 #SBATCH --partition=slow
 
-srun python /home/bsb10/scripts/page_rank_tester.pyc --execPath=/home/bsb10/Downloads/cmpt431_A3/ --scriptPath=/home/bsb10/Downloads/cmpt431_A3/scripts/page_rank_evaluator.pyc --inputPath=/home/bsb10/Downloads/cmpt431_A3/input_graphs/
+srun ./page_rank_pull_parallel --nThreads=4 --nIterations=20 --strategy=4 --granularity=1 --inputFile="/scratch/input_graphs/test_25M_50M"
+srun ./page_rank_pull_parallel --nThreads=4 --nIterations=20 --strategy=1 --granularity=1 --inputFile="/scratch/input_graphs/test_25M_50M"
