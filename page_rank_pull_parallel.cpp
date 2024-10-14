@@ -49,13 +49,6 @@ struct thread_args {
     long processedEdges;
     double barrier1_time;
     double barrier2_time;
-    double t1;
-    double t2;
-    double t3;
-    double t4;
-    double t5;
-    double t6;
-
     double getNextVertex_time;
     uint thread_id;
 };
@@ -100,13 +93,6 @@ void pageRankThread(thread_args *thread_args){
     timer localBarrier1;
     timer localBarrier2;
     timer localVertex;
-    timer bug1;
-    timer bug2;
-    timer bug3;
-    timer bug4;
-    timer bug5;
-    timer bug6;
-
 
 
     Vertex *vertices = thread_args->vertices; 
@@ -120,13 +106,6 @@ void pageRankThread(thread_args *thread_args){
     uint processedEdges = 0;
     double timeVertex = 0;
     uint thread_id = thread_args->thread_id;
-    double t1 = 0;
-    double t2 = 0;
-    double t3 = 0;
-    double t4 = 0;
-    double t5 = 0;
-    double t6 = 0;
-
 
 
   local.start();
@@ -139,7 +118,7 @@ void pageRankThread(thread_args *thread_args){
         // std::cout<<"this is new thread processed "<<u<<std::endl;
         timeVertex +=  localVertex.stop();
         // break;
-        bug1.start();
+        // bug1.start();
         if(u == -1 ){
           break;
         }
@@ -152,17 +131,16 @@ void pageRankThread(thread_args *thread_args){
           u++;
           if(u >= n) break;
         }
-        t1 += bug1.stop();
+        // t1 += bug1.stop();
       }
     }
     else {
-      bug1.start();
       for (uintV startIndexCopy = startIndex; startIndexCopy < endIndex; startIndexCopy++){
         PageRankType in_degree = vertices[startIndexCopy].getInDegree();
         processedEdges += in_degree;
         processVertex(vertices,startIndexCopy,pr_curr,pr_next, in_degree);
       }
-      t1 += bug1.stop();
+      // t1 += bug1.stop();
     }
     // if (done.fetch_add(1) == nThreads - 1) {
     //   nextProcessedVertex.store(0);
@@ -175,55 +153,56 @@ void pageRankThread(thread_args *thread_args){
   
     // std::cout<<"Done Waiting at the barrier"<<std::endl;
     if(strategy == 3 or strategy == 4){
-      bug2.start();
+      // bug2.start();
       if(thread_id == 0){
         nextProcessedVertex.store(0);
       }
-      t2 += bug2.stop();
+      // t2 += bug2.stop();
 
-      barrier->wait();
+      barrier->wait(); //tried using atomics here but resulted in a higher runtime
       while(true){
         localVertex.start();
         // std::cout<<"this is new thread processed 2nd loop before "<<nextProcessedVertex<<std::endl;
         uintV v  = getNextProcessedVertex(n);
         // std::cout<<"this is new thread processed 2nd loop "<<v<<std::endl;
         timeVertex +=  localVertex.stop();
-        bug4.start();
+        // bug4.start();
         // break;;
         if( v == -1){
           break;
-        }bug4.start()
+        // }bug4.start();
         for (uintV j = 0; j < k; j++) {
             // std::cout<<u<<std::endl;
-          bug5.start();
+          // bug5.start();
           // computePageRank(v,pr_next, pr_curr);
           pr_next[v] = PAGE_RANK(pr_next[v]);
           // reset pr_curer for the next iteration
           pr_curr[v] = pr_next[v];
           pr_next[v] = 0.0;
           processedVertex ++;
-          t5 += bug5.stop();
+          // t5 += bug5.stop();
 
-          bug6.start();
+          // bug6.start();
           //vertices_processed += 1 // used in output validation
           v++;
           if(v >= n) break;
-          t6 = bug6.stop();
+          // t6 = bug6.stop();
         }
-        t4 += bug4.stop();
+        // t4 += bug4.stop();
       }
     }
+    }
     else {
-        bug4.start();
+        // bug4.start();
       for (uintV v = startIndex; v < endIndex; v++) {
-          bug5.start();
+          // bug5.start();
         
         computePageRank(v,pr_next, pr_curr);
         processedVertex ++;
-          t5 += bug5.stop();
+          // t5 += bug5.stop();
 
       }
-      t4 += bug4.stop();
+      // t4 += bug4.stop();
     }
    
     // if (done.fetch_add(1) == nThreads - 1) {
@@ -233,7 +212,7 @@ void pageRankThread(thread_args *thread_args){
     localBarrier2.start();
     barrier->wait();
     thread_args->barrier2_time +=  localBarrier2.stop();
-    bug3.start();
+    // bug3.start();
   
     if(strategy == 3 or strategy == 4){
       if(thread_id == 0){
@@ -243,7 +222,7 @@ void pageRankThread(thread_args *thread_args){
       }
     }
       barrier->wait();
-      t3 += bug3.stop();
+      // t3 += bug3.stop();
 
   }
   // std::cout <<"this is total processed"<<processedVertex<<std::endl;
@@ -251,13 +230,6 @@ void pageRankThread(thread_args *thread_args){
   thread_args->processedVertices = processedVertex;
   thread_args->processedEdges = processedEdges;
   thread_args->getNextVertex_time = timeVertex;
-  thread_args->t1 = t1;
-  thread_args->t2 = t2;
-  thread_args->t3 = t3;
-  thread_args->t4 = t4;
-  thread_args->t5 = t5;
-  thread_args->t6 = t6;
-
 
 }
 
@@ -282,10 +254,11 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
   uint numOfVerPerThread = n/nThreads;
   uint remainder = n% nThreads;
   uint numOfEdgesPerThread = m/nThreads;
-  uint totalAssignedEdges = 0;
   uint startIndex = 0;
   uint endIndex = 0;
   Vertex * vertices = g.vertices_;
+  uint totalAssignedEdges = 0;
+
   t1.start();
   // std::cout<<"Total vertices:"<<n<<std::endl;
   // std::cout<<"Total threads:"<<nThreads<<std::endl;
@@ -302,12 +275,21 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
           endIndex += remainder;
       }
     }
-    else if(strategy == 2){
+    if(strategy == 2){
       // edge assignment
       int target = (i + 1) * numOfEdgesPerThread;
+      int jump = 10; // assuming our graph has an equal distribution of edges
+
       while(totalAssignedEdges < target){
-        totalAssignedEdges += vertices[endIndex].in_degree_;
-        endIndex ++;
+        int collectiveSum = 0;
+        for (int j = 0; j < jump && (endIndex + j) < n; ++j){
+          collectiveSum += vertices[endIndex + j].in_degree_;
+        }
+        totalAssignedEdges += collectiveSum;
+        endIndex += jump;
+        if(target - totalAssignedEdges < jump) {
+            jump = 1; // Switch back to single increments near the target
+        }
       }
       if(i == nThreads -1 && totalAssignedEdges < m ){
           endIndex = n;
@@ -328,13 +310,6 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
     all_arguments[i].getNextVertex_time = 0.0;
     all_arguments[i].barrier1_time = 0.0;
     all_arguments[i].barrier2_time = 0.0;
-    all_arguments[i].t1 = 0.0;
-    all_arguments[i].t2 = 0.0;
-    all_arguments[i].t3 = 0.0;
-    all_arguments[i].t4 = 0.0;
-    all_arguments[i].t5 = 0.0;
-    all_arguments[i].t6 = 0.0;
-
     all_arguments[i].thread_id = i;
     std::thread new_thread(pageRankThread,&all_arguments[i]);
     all_threads.push_back(std::move(new_thread));
@@ -350,7 +325,7 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
   // -------------------------------------------------------------------
   std::cout << "thread_id, num_vertices, num_edges, barrier1_time, barrier2_time, getNextVertex_time, total_time" << std::endl;
   for (int i = 0 ; i<nThreads; i++){
-    std::cout << i<<", " << all_arguments[i].processedVertices<<", " << all_arguments[i].processedEdges<<", " << all_arguments[i].barrier1_time<<", " << all_arguments[i].barrier2_time<<", " << all_arguments[i].getNextVertex_time<<", " << all_arguments[i].time_taken <<", " << all_arguments[i].t1 <<", " << all_arguments[i].t2 <<", " << all_arguments[i].t3 <<", " << all_arguments[i].t4 <<", " << all_arguments[i].t5 <<", " << all_arguments[i].t6 <<std::endl;
+    std::cout << i<<", " << all_arguments[i].processedVertices<<", " << all_arguments[i].processedEdges<<", " << all_arguments[i].barrier1_time<<", " << all_arguments[i].barrier2_time<<", " << all_arguments[i].getNextVertex_time<<", " << all_arguments[i].time_taken <<", "  <<std::endl;
   }
   // Print the above statistics for each thread
   // Example output for 2 threads:
