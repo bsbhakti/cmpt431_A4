@@ -258,7 +258,7 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
         totalAssignedEdges += chunk;
         endIndex +=jump;
         if(target - totalAssignedEdges < jump) {
-            jump = 1; // Switch back to single increments near the target
+            jump = 1; 
         }
       }
       if(i == nThreads -1 && totalAssignedEdges < m ){
