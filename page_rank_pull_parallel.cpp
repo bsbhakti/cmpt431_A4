@@ -28,6 +28,7 @@ typedef double PageRankType;
 CustomBarrier *barrier = nullptr;
 std::atomic<uintV> nextProcessedVertex(0);
 std::atomic<int> done(0);
+std::vector<uintV> processVertices;
 
 uint strategy = 1;
 int k = 1;
@@ -52,14 +53,14 @@ struct thread_args {
 };
 
 uintV getNextProcessedVertex(uintV n){ //rewrite it to use compare and exchange
-  uintV curr = nextProcessedVertex.fetch_add(k);
+  uintV curr = nextProcessedVertex.fetch_add(k,std::memory_order_relaxed);
 
   if(curr >=n){
     // std::cout<<"nThreads:"<<nThreads<<std::endl;
       return -1;
   }
   return curr;
-    uintV previous = nextProcessedVertex.load();
+    // uintV previous = nextProcessedVertex.load();
   // uintV previous = nextProcessedVertex.load();
   // uintV newVal = previous + k;
                 
@@ -74,32 +75,25 @@ uintV getNextProcessedVertex(uintV n){ //rewrite it to use compare and exchange
 }
 
 void incrementThreadsDone(int nThreads){ // increment done. if it is == nthreads. reset nextVertex and done
-  int prev = done.fetch_add(1);
-  // int expected = nThreads;
-  
-  // int expected = nThreads-1;
-  // uintV newVal = previous + 1;
+  int prev = done.fetch_add(1,std::memory_order_relaxed);
   if(prev == nThreads-1){
-    nextProcessedVertex.store(0);
-    done.store(0);
+    nextProcessedVertex.store(0,std::memory_order_relaxed);
+    done.store(0,std::memory_order_relaxed);
   }
-  // if(done.compare_exchange_weak(nThreads, 0)){//if  equal to nThreads -1 then update it to be 0
-  //   // std::cout<<"returned true"<<threadId<<std::endl;
-  //   //change nextVertex
-  //   nextProcessedVertex.store(0);
-  //   }
-  // std::cout<<"returned false"<<expected<<" "<<done<<std::endl;
 }
 
 void processVertex(Graph *g, uintV startIndexCopy, PageRankType *pr_curr, PageRankType *pr_next){
   uintE in_degree = g->vertices_[startIndexCopy].getInDegree();
+  PageRankType localSum = 0.0; 
           // std::cout<<"Number of in degree"<< in_degree<<std::endl;
-        for (uintE i = 0; i < in_degree; i++) {
+  for (uintE i = 0; i < in_degree; i++) {
           uintV u = g->vertices_[startIndexCopy].getInNeighbor(i);
           uintE u_out_degree = g->vertices_[u].getOutDegree();
-          if (u_out_degree > 0)
-              pr_next[startIndexCopy] += (pr_curr[u] / (PageRankType) u_out_degree);
+          if (u_out_degree > 0){
+              localSum += (pr_curr[u] / (PageRankType) u_out_degree);
         }
+  }
+  pr_next[startIndexCopy] += localSum;
 }
 
 void computePageRank(uintV v, PageRankType *pr_next, PageRankType*pr_curr){
@@ -142,12 +136,13 @@ void pageRankThread(thread_args *thread_args){
         if(u == -1 ){
           break;
         }
-        for (uintV j = 0; j < k; j++) {
+        uintV end = std::min(u + k, n);
+        for (uintV j = u; j < end; j++) {
             // std::cout<<u<<std::endl;
-          processedEdges += g->vertices_[u].getInDegree();
-          processVertex(g,u,pr_curr,pr_next);
-          u++;
-          if(u >= n) break;
+          processedEdges += g->vertices_[j].getInDegree();
+          processVertex(g,j,pr_curr,pr_next);
+          // u++;
+          // if(u >= n) break;
         }
       }
     }
@@ -175,13 +170,14 @@ void pageRankThread(thread_args *thread_args){
         if( v == -1){
           break;
         }
-        for (uintV j = 0; j < k; j++) {
+        uintV end = std::min(v + k, n);
+        for (uintV j = v; j < end; j++) {
             // std::cout<<u<<std::endl;
-          computePageRank(v,pr_next, pr_curr);
+          computePageRank(j,pr_next, pr_curr);
           processedVertex ++;
           //vertices_processed += 1 // used in output validation
-          v++;
-          if(v >= n) break;
+          // v++;
+          // if(v >= n) break;
         }
       }
 
@@ -203,7 +199,6 @@ void pageRankThread(thread_args *thread_args){
       // barrier->wait();
     // }
   }
-  // std::cout <<"this is total processed"<<processedVertex<<std::endl;
   thread_args->time_taken = local.stop();
   thread_args->processedVertices = processedVertex;
   thread_args->processedEdges = processedEdges;
