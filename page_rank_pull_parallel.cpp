@@ -30,7 +30,7 @@ std::atomic<uintV> nextProcessedVertex(0);
 std::atomic<uint> done(0);
 
 uint strategy = 1;
-uint k = 1;
+int k = 1;
 std::mutex vertexLock;
 uint endIndex = 0;
 uint nThreads = 0;
@@ -113,13 +113,19 @@ void pageRankThread(thread_args *thread_args){
         if(u == -1 ){
           break;
         }
-        for (uintV j = 0; j < k; j++) {
-            // std::cout<<u<<std::endl;
-          processedEdges += g->vertices_[u].getInDegree();
-          processVertex(g,u,pr_curr,pr_next);
-          u++;
-          if(u >= n) break;
+        uintV end = std::min(u+ k, n);  // Ensure we don't exceed 'n' vertices
+
+        for (uintV j = u; j < end; ++j) {
+            processedEdges += g->vertices_[j].getInDegree();  // Accumulate the in-degree
+            processVertex(g, j, pr_curr, pr_next);  // Process vertex 'j'
         }
+        // for (uintV j = 0; j < k; j++) {
+        //     // std::cout<<u<<std::endl;
+        //   processedEdges += g->vertices_[u].getInDegree();
+        //   processVertex(g,u,pr_curr,pr_next);
+        //   u++;
+        //   if(u >= n) break;
+        // }
       }
     }
     else {
@@ -145,14 +151,20 @@ void pageRankThread(thread_args *thread_args){
         if( v == -1){
           break;
         }
-        for (uintV j = 0; j < k; j++) {
-            // std::cout<<u<<std::endl;
+        uintV end = std::min(v+ k, n);  // Ensure we don't exceed 'n' vertices
+        for (uintV j = v; j < end; j++) {
           computePageRank(v,pr_next, pr_curr);
           processedVertex ++;
-          //vertices_processed += 1 // used in output validation
-          v++;
-          if(v >= n) break;
         }
+        
+        // for (uintV j = 0; j < k; j++) {
+        //     // std::cout<<u<<std::endl;
+        //   computePageRank(v,pr_next, pr_curr);
+        //   processedVertex ++;
+        //   //vertices_processed += 1 // used in output validation
+        //   v++;
+        //   if(v >= n) break;
+        // }
       }
 
     }
@@ -202,6 +214,7 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
   uint totalAssignedEdges = 0;
   uint startIndex = 0;
   uint endIndex = 0;
+  Vertex *vertices = g.vertices_;
   t1.start();
   // std::cout<<"Total vertices:"<<n<<std::endl;
 
@@ -217,16 +230,21 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
       }
     }
     else if(strategy == 2){
-      // edge assignment
-      while(totalAssignedEdges < ((i +1) *numOfEdgesPerThread)){
-        totalAssignedEdges += g.vertices_[endIndex].in_degree_;
-        endIndex ++;
-      }
-      if(i == nThreads -1){
-        if(m - totalAssignedEdges){
-          endIndex = n;
-          // totalAssignedEdges +=1 
+      int jump = 10;
+      int target = (i + 1) * numOfEdgesPerThread;
+      while(totalAssignedEdges < target){
+        int chunk = 0;
+        for(int j = 0; j < jump && (endIndex + j) < n; j++){
+          chunk += vertices[endIndex + j].in_degree_;
         }
+        totalAssignedEdges += chunk;
+        endIndex +=jump;
+        if(target - totalAssignedEdges < jump) {
+            jump = 1; // Switch back to single increments near the target
+        }
+      }
+      if(i == nThreads -1 && totalAssignedEdges < m ){
+          endIndex = n;
       }
     }
   

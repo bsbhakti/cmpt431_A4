@@ -248,15 +248,23 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
       }
     }
     else if(strategy == 2){
+      int jump = 10;
       int target = (i + 1) * numOfEdgesPerThread;
       while(totalAssignedEdges < target){
-        totalAssignedEdges += vertices[endIndex].in_degree_;
-        endIndex ++;
+        int chunk = 0;
+        for(int j = 0; j < jump && endIndex + j < n; ++j){
+          chunk += vertices[endIndex + j].in_degree_;
+        }
+        totalAssignedEdges += chunk;
+        endIndex +=jump;
+        if(target - totalAssignedEdges < jump) {
+            jump = 1; // Switch back to single increments near the target
+        }
       }
       if(i == nThreads -1 && totalAssignedEdges < m ){
           endIndex = n;
       }
-      }
+    }
     // std::cout<<"StartInd: "<< startIndex<<"EndInd: "<<endIndex<< "Thread: "<<" edges assigned:"<<totalAssignedEdges<<i<<std::endl;
     
     // std::cout<<"StartInd: "<< startIndex<<"EndInd: "<<endIndex<< "Thread: "<<i<<std::endl;
