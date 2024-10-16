@@ -56,22 +56,9 @@ uintV getNextProcessedVertex(uintV n){ //rewrite it to use compare and exchange
   uintV curr = nextProcessedVertex.fetch_add(k,std::memory_order_relaxed);
 
   if(curr >=n){
-    // std::cout<<"nThreads:"<<nThreads<<std::endl;
       return -1;
   }
   return curr;
-    // uintV previous = nextProcessedVertex.load();
-  // uintV previous = nextProcessedVertex.load();
-  // uintV newVal = previous + k;
-                
-  //   while(!nextProcessedVertex.compare_exchange_weak(previous, newVal)){ //if not equal previous is updated 
-  //       newVal =  previous + k;
-  //   }
-  //   if(previous >= n){
-  //     return -1;
-  //   }
-  //   return previous;
-
 }
 
 void incrementThreadsDone(int nThreads){ // increment done. if it is == nthreads. reset nextVertex and done
@@ -85,7 +72,6 @@ void incrementThreadsDone(int nThreads){ // increment done. if it is == nthreads
 void processVertex(Graph *g, uintV startIndexCopy, PageRankType *pr_curr, PageRankType *pr_next){
   uintE in_degree = g->vertices_[startIndexCopy].getInDegree();
   PageRankType localSum = 0.0; 
-          // std::cout<<"Number of in degree"<< in_degree<<std::endl;
   for (uintE i = 0; i < in_degree; i++) {
           uintV u = g->vertices_[startIndexCopy].getInNeighbor(i);
           uintE u_out_degree = g->vertices_[u].getOutDegree();
@@ -104,7 +90,6 @@ void computePageRank(uintV v, PageRankType *pr_next, PageRankType*pr_curr){
 }
 
 void pageRankThread(thread_args *thread_args){
-    // std::cout<<"Inside thread method"<<std::endl;
     timer local;
     timer localBarrier1;
     timer localBarrier2;
@@ -131,18 +116,14 @@ void pageRankThread(thread_args *thread_args){
         localVertex.start();
         uintV u  = getNextProcessedVertex(n);
         thread_args->getNextVertex_time +=  localVertex.stop();
-        // break;
 
         if(u == -1 ){
           break;
         }
         uintV end = std::min(u + k, n);
         for (uintV j = u; j < end; j++) {
-            // std::cout<<u<<std::endl;
           processedEdges += g->vertices_[j].getInDegree();
           processVertex(g,j,pr_curr,pr_next);
-          // u++;
-          // if(u >= n) break;
         }
       }
     }
@@ -152,32 +133,27 @@ void pageRankThread(thread_args *thread_args){
       }
     }
     // barrier wait here because we are about the switch curr and next
-    incrementThreadsDone(nThreads);
+    // tried using atomics but higher runtime
+    // incrementThreadsDone(nThreads);
     localBarrier1.start();
     barrier->wait();
     thread_args->barrier1_time +=  localBarrier1.stop();
-    // std::cout<<"Done Waiting at the barrier"<<std::endl;
     if(strategy == 3 or strategy == 4){
-      // if(thread_id == 0){ //make atomic
-      //   nextProcessedVertex = 0; //make it equal to the number of processed vertices??
-      // }
-      // barrier->wait();
+      if(thread_id == 0){ 
+        nextProcessedVertex.store(0,std::memory_order_relaxed));
+      }
+      barrier->wait();
       while(true){
         localVertex.start();
         uintV v  = getNextProcessedVertex(n);
         thread_args->getNextVertex_time +=  localVertex.stop();
-        // break;
         if( v == -1){
           break;
         }
         uintV end = std::min(v + k, n);
         for (uintV j = v; j < end; j++) {
-            // std::cout<<u<<std::endl;
           computePageRank(j,pr_next, pr_curr);
           processedVertex ++;
-          //vertices_processed += 1 // used in output validation
-          // v++;
-          // if(v >= n) break;
         }
       }
 
@@ -187,17 +163,16 @@ void pageRankThread(thread_args *thread_args){
         computePageRank(v,pr_next, pr_curr);
       }
     }
-    incrementThreadsDone(nThreads);
+    // incrementThreadsDone(nThreads);
     localBarrier2.start();
     barrier->wait();
     thread_args->barrier2_time +=  localBarrier2.stop();
-    // if(strategy == 3 or strategy == 4){
-      // if(thread_id == 0){
-      //   nextProcessedVertex.store(0,std::memory_order_relaxed);
-      //   //  std::cout<<"making it 0 "<<nextProcessedVertex<<" "<<done<<std::endl;
-      // }
-      // barrier->wait();
-    // }
+    if(strategy == 3 or strategy == 4){
+      if(thread_id == 0){
+        nextProcessedVertex.store(0,std::memory_order_relaxed);
+      }
+      barrier->wait();
+    }
   }
   thread_args->time_taken = local.stop();
   thread_args->processedVertices = processedVertex;
@@ -254,7 +229,7 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
         totalAssignedEdges += chunk;
         endIndex +=jump;
         if(target - totalAssignedEdges < jump) {
-            jump = 1; // Switch back to single increments near the target
+            jump = 1; 
         }
       }
       if(i == nThreads -1 && totalAssignedEdges < m ){
@@ -262,8 +237,6 @@ void pageRankSerial(Graph &g, int max_iters, uint nThreads, uint strategy) {
       }
     }
   
-    // std::cout<<"StartInd: "<< startIndex<<"EndInd: "<<endIndex<< "Thread: "<<i<<std::endl;
-
     all_arguments[i].g = &g;
     all_arguments[i].max_iter = max_iters;
     all_arguments[i].startIndex = startIndex;
