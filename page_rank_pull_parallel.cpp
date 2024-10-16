@@ -142,7 +142,9 @@ void pageRankThread(thread_args *thread_args){
       if(thread_id == 0){ 
         nextProcessedVertex.store(0,std::memory_order_relaxed);
       }
+      localBarrier1.start();
       barrier->wait();
+      thread_args->barrier1_time +=  localBarrier1.stop();
       while(true){
         localVertex.start();
         uintV v  = getNextProcessedVertex(n);
@@ -171,7 +173,9 @@ void pageRankThread(thread_args *thread_args){
       if(thread_id == 0){
         nextProcessedVertex.store(0,std::memory_order_relaxed);
       }
+      localBarrier2.start();
       barrier->wait();
+      thread_args->barrier2_time +=  localBarrier2.stop();
     }
   }
   thread_args->time_taken = local.stop();
