@@ -140,7 +140,7 @@ void pageRankThread(thread_args *thread_args){
     thread_args->barrier1_time +=  localBarrier1.stop();
     if(strategy == 3 or strategy == 4){
       if(thread_id == 0){ 
-        nextProcessedVertex.store(0,std::memory_order_relaxed));
+        nextProcessedVertex.store(0,std::memory_order_relaxed);
       }
       barrier->wait();
       while(true){
